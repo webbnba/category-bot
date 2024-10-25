@@ -1,43 +1,35 @@
 package com.example.categorybot.bot;
 
-import com.example.categorybot.command.Command;
+import com.example.categorybot.command.CommandDispatcher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.util.Map;
-
 @Component
-public class CategoryBot extends TelegramLongPollingBot {
+@Slf4j
+public class CategoryBotListener extends TelegramLongPollingBot {
+    private final CommandDispatcher dispatcher;
 
-
-    public CategoryBot(@Value("${bot.token}") String botToken) {
+    public CategoryBotListener(@Value("${bot.token}") String botToken, CommandDispatcher dispatcher) {
         super(botToken);
-
+        this.dispatcher = dispatcher;
     }
-
+    /**
+     * Обрабатывает полученные обновления от Telegram.
+     * Логирует обновление и передает его для дальнейшей обработки в {@link CommandDispatcher}.
+     *
+     * @param update Входящее обновление от Telegram.
+     */
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String messageText = update.getMessage().getText();
-            String commandKey = extractCommandKey(messageText);
-
-            Command command = commands.get(commandKey);
-            if (command != null) {
-                command.execute(update);
-            } else {
-                // Обработка неизвестной команды
-            }
-        }
+        log.info("Get update " + update.toString());
+        dispatcher.handleUpdate(update);
     }
 
     @Override
     public String getBotUsername() {
         return "category_tree_test_bot";
-    }
-
-    private String extractCommandKey(String messageText) {
-        return messageText.split(" ")[0];
     }
 }
