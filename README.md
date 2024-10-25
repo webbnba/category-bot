@@ -69,5 +69,3 @@
 
 - `BotToken` - Токен вашего Telegram бота.
 
-
-# category-bot
